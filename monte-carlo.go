@@ -2,54 +2,52 @@ package main;
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 	"runtime"
+	"math/rand"
 )
 
-func Sequential (samples int) float64 {
+func Sequential (points int) float64 {
 	var inside int = 0
 
-	for i := 0; i < samples; i++ {
+	for i := 0; i < points; i++ {
 		x := rand.Float64()
 		y := rand.Float64()
-		if (x*x + y*y) < 1 {
+		if x * x + y * y < 1 {
 			inside++
 		}
 	}
 
-	ratio := float64(inside) / float64(samples)
-
-	return ratio * 4
+	return 4 * float64(inside) / float64(points)
 }
 
-func MonteCarlo(samples int) float64 {
-	cpus := runtime.NumCPU()
+func MonteCarlo(points int) float64 {
+	cores := runtime.NumCPU()
 
-	threadSamples := samples / cpus
-	results := make(chan float64, cpus)
+	sample := points / cores
+	results := make(chan float64, cores)
 
-	for j := 0; j < cpus; j++ {
+	for core := 0; core < cores; core++ {
 		go func() {
-			var inside int
+			var inside int = 0
 			r := rand.New(rand.NewSource(time.Now().UnixNano()))
-			for i := 0; i < threadSamples; i++ {
+			for point := 0; point < sample; point++ {
 				x, y := r.Float64(), r.Float64()
 
-				if x*x+y*y <= 1 {
+				if x * x + y * y <= 1 {
 					inside++
 				}
 			}
-			results <- float64(inside) / float64(threadSamples) * 4
+			results <- 4 * float64(inside) / float64(sample) 
 		}()
 	}
 
 	var total float64
-	for i := 0; i < cpus; i++ {
+	for i := 0; i < cores; i++ {
 		total += <-results
 	}
 
-	return total / float64(cpus)
+	return total / float64(cores)
 }
 
 func init() {
@@ -73,5 +71,4 @@ func main(){
 	end_sequential := time.Now()
 	fmt.Println("Valor de pi no algoritmo sequencial:", monte_carlo_sequential)
 	fmt.Println("Tempo sequencial:", end_sequential.Sub(start_sequential))
-
 }
