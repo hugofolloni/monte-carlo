@@ -99,11 +99,16 @@ func main(){
 	var SAMPLES int
 	fmt.Printf("Tamanho do sample: ")
 	fmt.Scanf("%d", &SAMPLES)
-	
+
 	var THREADS int
 	fmt.Printf("Número de threads: ")
 	fmt.Scanf("%d", &THREADS)
-	
+
+	if !(THREADS > 0 && SAMPLES > 0){
+		fmt.Println("Os parâmetros passados são inválidos!")
+		return
+	}
+
 	fmt.Println()
 
 	fmt.Println("Vamos utilizar", SAMPLES, "iterações e", THREADS, "threads para aproximar o valor de Pi")
@@ -131,4 +136,5 @@ func main(){
 	fmt.Println("Valor de pi no algoritmo sequencial:", monte_carlo_sequential)
 	fmt.Println("Tempo sequencial:", end_sequential.Sub(start_sequential))
 
-	}
+}
+
