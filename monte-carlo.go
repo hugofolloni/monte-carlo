@@ -22,8 +22,8 @@ func Sequential (points int) float64 {
 	return 4 * float64(inside) / float64(points)
 }
 
-func MonteCarlo(points int) float64 {
-	cores := runtime.NumCPU()
+func MonteCarlo(points int, threads int) float64 {
+	cores := threads
 
 	sample := points / cores
 	results := make(chan float64, cores)
@@ -53,10 +53,9 @@ func MonteCarlo(points int) float64 {
 
 var total int = 0
 
-func MonteCarloBolsa(points int) float64 {
-	cores := runtime.NumCPU()
+func MonteCarloBolsa(points int, threads int) float64 {
+	cores := threads
 
-	// var wg sync.WaitGroup
 	var mutex sync.Mutex	
 
 	results := make(chan float64, cores)
@@ -97,18 +96,29 @@ func init() {
 }
 
 func main(){
-	var SAMPLES int = 1000000
+	var SAMPLES int
+	fmt.Printf("Tamanho do sample: ")
+	fmt.Scanf("%d", &SAMPLES)
+	
+	var THREADS int
+	fmt.Printf("Número de threads: ")
+	fmt.Scanf("%d", &THREADS)
+	
+	fmt.Println()
+
+	fmt.Println("Vamos utilizar", SAMPLES, "iterações e", THREADS, "threads para aproximar o valor de Pi")
+	fmt.Println()
 
 	start_concurrency := time.Now()
-	monte_carlo_concurrency := MonteCarlo(SAMPLES)
+	monte_carlo_concurrency := MonteCarlo(SAMPLES, THREADS)
 	end_concurrency := time.Now()
-	fmt.Println("Valor de pi no algoritmo concorrente:", monte_carlo_concurrency)
-	fmt.Println("Tempo concorrente:",  end_concurrency.Sub(start_concurrency))
+	fmt.Println("Valor de pi no algoritmo concorrente utilizando divisão de tarefas:", monte_carlo_concurrency)
+	fmt.Println("Tempo concorrente com divisão de tarefas:",  end_concurrency.Sub(start_concurrency))
 
 	fmt.Println()
 
 	start_pack := time.Now()
-	monte_carlo_pack := MonteCarloBolsa(SAMPLES)
+	monte_carlo_pack := MonteCarloBolsa(SAMPLES, THREADS)
 	end_pack := time.Now()
 	fmt.Println("Valor de pi no algoritmo concorrente utilizando bolsa de tarefas:", monte_carlo_pack)
 	fmt.Println("Tempo concorrente com bolsa de tarefas:",  end_pack.Sub(start_pack))
